@@ -1,6 +1,6 @@
 const gameBoard = document.getElementById('game-board');
 const totalPool = 34;
-const pairsToMatch = 8;
+const pairsCount = 8; // For a 4x4 grid
 
 let hasFlipped = false;
 let lockBoard = false;
@@ -11,29 +11,29 @@ function initGame() {
     gameBoard.innerHTML = '';
     matches = 0;
 
-    // Mapping your specific file extensions from GitHub
-    let imagePool = [];
+    // Build image list based on your actual GitHub file extensions
+    let images = [];
     for (let i = 1; i <= totalPool; i++) {
-        if (i !== 6 && i !== 30) {
-            let ext = '.jpg'; // Default
-            if ([29, 3, 30, 6, 7, 8, 9].includes(i)) ext = '.png';
-            if ([1, 31, 32, 33, 34].includes(i)) ext = '.jpeg';
-            
-            imagePool.push(`${i}${ext}`);
-        }
+        if (i === 6 || i === 30) continue; // Skip logo and back card
+
+        let ext = '.jpg'; // Default
+        if ([1, 31, 32, 33, 34, 18].includes(i)) ext = '.jpeg';
+        if ([29, 3, 7, 8, 9].includes(i)) ext = '.png';
+        
+        images.push(`${i}${ext}`);
     }
 
-    // Random selection and shuffle
-    imagePool.sort(() => Math.random() - 0.5);
-    let selected = imagePool.slice(0, pairsToMatch);
-    let deck = [...selected, ...selected].sort(() => Math.random() - 0.5);
+    // Shuffle and pick 8 pairs
+    images.sort(() => Math.random() - 0.5);
+    let selection = images.slice(0, pairsCount);
+    let deck = [...selection, ...selection].sort(() => Math.random() - 0.5);
 
-    deck.forEach(imgFile => {
+    deck.forEach(name => {
         const card = document.createElement('div');
         card.classList.add('memory-card');
-        card.dataset.name = imgFile;
+        card.dataset.id = name;
         card.innerHTML = `
-            <img class="front-face" src="img/${imgFile}">
+            <img class="front-face" src="img/${name}">
             <div class="back-face"></div>
         `;
         card.addEventListener('click', flipCard);
@@ -57,12 +57,12 @@ function flipCard() {
 }
 
 function checkMatch() {
-    let isMatch = firstCard.dataset.name === secondCard.dataset.name;
+    let isMatch = firstCard.dataset.id === secondCard.dataset.id;
     if (isMatch) {
         matches++;
         document.getElementById('sound-match').play();
-        if (matches === pairsToMatch) {
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        if (matches === pairsCount) {
+            confetti({ particleCount: 150, spread: 70 });
             setTimeout(() => { document.getElementById('win-modal').style.display = 'flex'; }, 500);
         }
         resetTurn();
@@ -82,13 +82,13 @@ function resetTurn() {
     [firstCard, secondCard] = [null, null];
 }
 
-// Global Countdown Logic
-let countdown = 5;
-const timer = setInterval(() => {
-    countdown--;
-    document.getElementById('count-num').innerText = countdown;
-    if (countdown === 0) {
-        clearInterval(timer);
+// Countdown to Start
+let timer = 5;
+const startCounter = setInterval(() => {
+    timer--;
+    document.getElementById('count-num').innerText = timer;
+    if (timer === 0) {
+        clearInterval(startCounter);
         document.getElementById('intro-overlay').style.display = 'none';
         document.getElementById('bg-music').play();
         initGame();
