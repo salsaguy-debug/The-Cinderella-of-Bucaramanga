@@ -12,18 +12,30 @@ const totalPool = 35;
 const pairsCount = 8; 
 let firstCard, secondCard, hasFlipped, lockBoard, matches, moves = 0;
 let timer = 5;
-
 let audioState = { master: 0.5, bg: 0.5, sfx: 0.5, muted: false };
 
-// Load High Score on Start
+// --- Setup ---
 updateBestScoreDisplay();
-
 document.getElementById('new-game-btn').addEventListener('click', resetGame);
 document.getElementById('play-again-btn').addEventListener('click', resetGame);
 document.getElementById('mute-btn').addEventListener('click', toggleMute);
+
+// Slider Listeners
 document.getElementById('master-slider').addEventListener('input', (e) => { audioState.master = e.target.value; applyVolumes(); });
 document.getElementById('bg-music-slider').addEventListener('input', (e) => { audioState.bg = e.target.value; applyVolumes(); });
 document.getElementById('sfx-slider').addEventListener('input', (e) => { audioState.sfx = e.target.value; applyVolumes(); });
+
+// Audio Unlocker
+function unlockAudio() {
+    bgMusic.play().then(() => {
+        console.log("Audio unlocked.");
+        applyVolumes();
+    }).catch(() => {});
+    document.removeEventListener('click', unlockAudio);
+    document.removeEventListener('touchstart', unlockAudio);
+}
+document.addEventListener('click', unlockAudio);
+document.addEventListener('touchstart', unlockAudio);
 
 function initGame() {
     gameBoard.innerHTML = '';
@@ -34,6 +46,7 @@ function initGame() {
     
     let images = [];
     for (let i = 1; i <= totalPool; i++) {
+        // Skip system images (3=Back, 30=Logo, 40=BG)
         if (i === 3 || i === 30 || i === 40) continue; 
         images.push(`${i}.png`);
     }
@@ -86,7 +99,6 @@ function handleWin() {
         winMsg = `New High Score! ${moves} moves!`;
         updateBestScoreDisplay();
     }
-
     document.getElementById('win-message').innerText = winMsg;
     setTimeout(() => { document.getElementById('win-modal').style.display = 'flex'; }, 600);
 }
@@ -101,11 +113,20 @@ function resetGame() { initGame(); }
 function toggleAudioModal() { const modal = document.getElementById('audio-modal'); modal.style.display = modal.style.display === 'none' ? 'flex' : 'none'; }
 
 function applyVolumes() {
-    if (audioState.muted) { bgMusic.volume = 0; Object.values(sfx).forEach(s => s.volume = 0); } 
-    else { bgMusic.volume = audioState.bg * audioState.master; Object.values(sfx).forEach(s => s.volume = audioState.sfx * audioState.master); }
+    if (audioState.muted) { 
+        bgMusic.volume = 0; 
+        Object.values(sfx).forEach(s => s.volume = 0); 
+    } else { 
+        bgMusic.volume = audioState.bg * audioState.master; 
+        Object.values(sfx).forEach(s => s.volume = audioState.sfx * audioState.master); 
+    }
 }
 
-function toggleMute() { audioState.muted = !audioState.muted; document.getElementById('mute-btn').innerText = audioState.muted ? 'Mute All: ON' : 'Mute All: OFF'; applyVolumes(); }
+function toggleMute() { 
+    audioState.muted = !audioState.muted; 
+    document.getElementById('mute-btn').innerText = audioState.muted ? 'Mute All: ON' : 'Mute All: OFF'; 
+    applyVolumes(); 
+}
 
 const countdown = setInterval(() => {
     timer--;
@@ -114,9 +135,6 @@ const countdown = setInterval(() => {
         clearInterval(countdown);
         document.getElementById('intro-overlay').style.display = 'none';
         initGame();
-        bgMusic.play().catch(() => {});
         applyVolumes();
     }
 }, 1000);
-
-document.body.addEventListener('click', () => { if (bgMusic.paused && timer <= 0) { bgMusic.play(); applyVolumes(); } }, { once: true });
