@@ -2,10 +2,16 @@
   --orange: #ff8c00;
   --crimson: #a80000;
   --dark-red: #660000;
+  /* Slightly transparent white for peek-through effect */
+  --light-bg: rgba(255, 255, 255, 0.9); 
 }
 
 body {
-  background-color: var(--crimson);
+  /* FIX: Using image 40 as the background */
+  background-image: url('img/40.png'); 
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* Keep background static */
   color: white;
   font-family: 'Georgia', serif;
   display: flex;
@@ -26,13 +32,12 @@ body {
   align-items: center;
 }
 
-/* FIX: Smaller Logo on welcome screen */
 #intro-logo {
-  width: 80px; 
-  height: 80px;
+  width: 120px; 
+  height: 120px;
   border-radius: 50%;
-  border: 2px solid var(--orange);
-  margin-bottom: 10px;
+  border: 4px solid var(--orange);
+  margin-bottom: 20px;
 }
 
 .intro-box {
@@ -40,13 +45,13 @@ body {
   padding: 20px;
   border-radius: 15px;
   border: 1px solid var(--orange);
-  max-width: 320px;
+  max-width: 350px;
 }
 
 .game-header {
   width: 100%;
   padding: 15px 0;
-  background-color: var(--dark-red);
+  background-color: rgba(102, 0, 0, 0.85); /* Transparent dark red */
   border-bottom: 3px solid var(--orange);
   display: flex;
   flex-direction: column;
@@ -87,6 +92,9 @@ body {
   transform-style: preserve-3d;
   transition: transform 0.4s;
   cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
 }
 
 .memory-card.flip { transform: rotateY(180deg); }
@@ -99,8 +107,15 @@ body {
   border: 2px solid var(--orange);
 }
 
-.front-face { transform: rotateY(180deg); background: white; }
-.back-face { background-image: url('img/6.png'); background-size: cover; }
+.front-face { 
+  transform: rotateY(180deg); 
+  background-color: var(--light-bg); /* Semi-transparent white */
+}
+
+.back-face { 
+  background-image: url('img/6.png'); 
+  background-size: cover; 
+}
 
 .btn-orange {
   background: var(--orange);
@@ -113,3 +128,8 @@ body {
 }
 
 .btn-audio { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: white; }
+
+/* Styles for Win Modal and general readability */
+.win-card h2, .win-card p { color: white; }
+h1, h2, h3 { font-family: 'Arial Black', sans-serif; } 
+p, span, b, button { text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
