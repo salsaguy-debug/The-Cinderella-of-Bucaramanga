@@ -14,49 +14,25 @@ let firstCard, secondCard, hasFlipped, lockBoard, matches, moves = 0;
 let timer = 5;
 let audioState = { master: 0.5, bg: 0.5, sfx: 0.5, muted: false };
 
-// --- CRITICAL AUDIO ENGINE FIX ---
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-let audioCtx;
-
-function initAudioContext() {
-    if (!audioCtx) {
-        audioCtx = new AudioContext();
-    }
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
-}
-
-// Update Best Score on load
+// --- 1. PERSISTENCE & INITIALIZATION ---
 const best = localStorage.getItem('memoryGameBest');
 bestDisplay.innerText = best ? best : '--';
 
-// Trigger music/context on ANY click
-document.addEventListener('click', () => {
-    initAudioContext();
-    forcePlayMusic();
-}, { once: false });
-
+// --- 2. THE CRITICAL AUDIO FIX ---
+// This wakes up the audio engine and handles the "404" or "Pending" issues
 function forcePlayMusic() {
     applyVolumes();
     if (bgMusic.paused) {
         bgMusic.play()
-            .then(() => console.log("OGG Music Playing Successfully"))
-            .catch(err => console.log("Playback pending user interaction..."));
+            .then(() => console.log("Success: bg_music.mp3 is playing."))
+            .catch(err => console.warn("Browser still blocking audio. Click a card to start."));
     }
 }
 
-function applyVolumes() {
-    if (audioState.muted) {
-        bgMusic.volume = 0;
-        Object.values(sfx).forEach(s => s.volume = 0);
-    } else {
-        bgMusic.volume = audioState.bg * audioState.master;
-        Object.values(sfx).forEach(s => s.volume = audioState.sfx * audioState.master);
-    }
-}
+// Ensure ANY click on the page attempts to start the music
+document.addEventListener('click', forcePlayMusic, { once: false });
 
-// --- Game Logic ---
+// --- 3. GAME LOGIC ---
 function initGame() {
     gameBoard.innerHTML = '';
     matches = 0; moves = 0;
@@ -66,10 +42,12 @@ function initGame() {
     
     let images = [];
     for (let i = 1; i <= totalPool; i++) {
+        // Skip system images: 3 (Back), 30 (Logo), 40 (BG)
         if (i === 3 || i === 30 || i === 40) continue; 
         images.push(`${i}.png`);
     }
 
+    // Shuffle and pick pairs
     images.sort(() => Math.random() - 0.5);
     let selection = images.slice(0, pairsCount);
     let deck = [...selection, ...selection].sort(() => Math.random() - 0.5);
@@ -78,7 +56,12 @@ function initGame() {
         const card = document.createElement('div');
         card.classList.add('memory-card');
         card.dataset.id = name;
-        card.innerHTML = `<div class="front-face"><img src="img/${name}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"></div><div class="back-face"></div>`;
+        // Card back uses 3.png
+        card.innerHTML = `
+            <div class="front-face">
+                <img src="img/${name}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
+            </div>
+            <div class="back-face"></div>`;
         card.addEventListener('click', flipCard);
         gameBoard.appendChild(card);
     });
@@ -87,9 +70,7 @@ function initGame() {
 function flipCard() {
     if (lockBoard || this === firstCard) return;
     
-    // Attempt to wake up audio on every flip
-    initAudioContext();
-    forcePlayMusic();
+    forcePlayMusic(); // Try playing music on every flip until it starts
 
     this.classList.add('flip');
     if (sfx.flip) sfx.flip.play();
@@ -133,34 +114,49 @@ function handleWin() {
     setTimeout(() => { document.getElementById('win-modal').style.display = 'flex'; }, 600);
 }
 
-function resetTurn() { [hasFlipped, lockBoard] = [false, false]; [firstCard, secondCard] = [null, null]; }
+function resetTurn() {
+    [hasFlipped, lockBoard] = [false, false];
+    [firstCard, secondCard] = [null, null];
+}
 
+// --- 4. UI & AUDIO CONTROLS ---
 document.getElementById('new-game-btn').addEventListener('click', () => { initGame(); forcePlayMusic(); });
 document.getElementById('play-again-btn').addEventListener('click', () => { initGame(); forcePlayMusic(); });
 
-// Countdown
-const countdown = setInterval(() => {
-    timer--;
-    if (document.getElementById('count-num')) document.getElementById('count-num').innerText = timer;
-    if (timer <= 0) {
-        clearInterval(countdown);
-        document.getElementById('intro-overlay').style.display = 'none';
-        initGame();
-    }
-}, 1000);
-
-// Audio Modal Toggles
 function toggleAudioModal() {
     const modal = document.getElementById('audio-modal');
     modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
 }
+
+function applyVolumes() {
+    if (audioState.muted) {
+        bgMusic.volume = 0;
+        Object.values(sfx).forEach(s => s.volume = 0);
+    } else {
+        bgMusic.volume = audioState.bg * audioState.master;
+        Object.values(sfx).forEach(s => s.volume = audioState.sfx * audioState.master);
+    }
+}
+
 function toggleMute() {
     audioState.muted = !audioState.muted;
     document.getElementById('mute-btn').innerText = audioState.muted ? 'Mute All: ON' : 'Mute All: OFF';
     applyVolumes();
 }
 
-// Listeners for Sliders
+// Slider Listeners
 document.getElementById('master-slider').addEventListener('input', (e) => { audioState.master = e.target.value; applyVolumes(); });
 document.getElementById('bg-music-slider').addEventListener('input', (e) => { audioState.bg = e.target.value; applyVolumes(); });
 document.getElementById('sfx-slider').addEventListener('input', (e) => { audioState.sfx = e.target.value; applyVolumes(); });
+
+// --- 5. STARTUP COUNTDOWN ---
+const countdown = setInterval(() => {
+    timer--;
+    const countEl = document.getElementById('count-num');
+    if (countEl) countEl.innerText = timer;
+    if (timer <= 0) {
+        clearInterval(countdown);
+        document.getElementById('intro-overlay').style.display = 'none';
+        initGame();
+    }
+}, 1000);
