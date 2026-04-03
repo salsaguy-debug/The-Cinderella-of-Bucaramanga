@@ -14,28 +14,28 @@ let firstCard, secondCard, hasFlipped, lockBoard, matches, moves = 0;
 let timer = 5;
 let audioState = { master: 0.5, bg: 0.5, sfx: 0.5, muted: false };
 
-// --- Persistence & Initialization ---
 updateBestScoreDisplay();
 
-document.getElementById('new-game-btn').addEventListener('click', () => { kickstartAudio(); resetGame(); });
-document.getElementById('play-again-btn').addEventListener('click', () => { kickstartAudio(); resetGame(); });
+// --- Event Listeners ---
+document.getElementById('new-game-btn').addEventListener('click', () => { forcePlayMusic(); resetGame(); });
+document.getElementById('play-again-btn').addEventListener('click', () => { forcePlayMusic(); resetGame(); });
 document.getElementById('mute-btn').addEventListener('click', toggleMute);
 
-// Sliders
 document.getElementById('master-slider').addEventListener('input', (e) => { audioState.master = e.target.value; applyVolumes(); });
 document.getElementById('bg-music-slider').addEventListener('input', (e) => { audioState.bg = e.target.value; applyVolumes(); });
 document.getElementById('sfx-slider').addEventListener('input', (e) => { audioState.sfx = e.target.value; applyVolumes(); });
 
-// THE FIX: Kickstart background music on any click
-function kickstartAudio() {
+// GLOBAL TRIGGER: Browser safety unlock
+document.addEventListener('click', forcePlayMusic, { once: false });
+
+function forcePlayMusic() {
+    applyVolumes();
     if (bgMusic.paused) {
-        bgMusic.play().catch(() => console.log("Waiting for interaction..."));
-        applyVolumes();
+        bgMusic.play()
+            .then(() => console.log("Music started."))
+            .catch(() => console.log("Waiting for user gesture..."));
     }
 }
-
-// Global click listener to unlock audio if it's still blocked
-document.body.addEventListener('click', kickstartAudio, { once: true });
 
 function initGame() {
     gameBoard.innerHTML = '';
@@ -49,6 +49,7 @@ function initGame() {
         if (i === 3 || i === 30 || i === 40) continue; 
         images.push(`${i}.png`);
     }
+
     images.sort(() => Math.random() - 0.5);
     let selection = images.slice(0, pairsCount);
     let deck = [...selection, ...selection].sort(() => Math.random() - 0.5);
@@ -65,9 +66,7 @@ function initGame() {
 
 function flipCard() {
     if (lockBoard || this === firstCard) return;
-    
-    kickstartAudio(); // Double-check music starts on card click
-
+    forcePlayMusic();
     this.classList.add('flip');
     if (sfx.flip) sfx.flip.play();
     if (!hasFlipped) { hasFlipped = true; firstCard = this; return; }
@@ -86,11 +85,7 @@ function checkMatch() {
     } else {
         lockBoard = true;
         if (sfx.mismatch) sfx.mismatch.play();
-        setTimeout(() => { 
-            firstCard.classList.remove('flip'); 
-            secondCard.classList.remove('flip'); 
-            resetTurn(); 
-        }, 1000);
+        setTimeout(() => { firstCard.classList.remove('flip'); secondCard.classList.remove('flip'); resetTurn(); }, 1000);
     }
 }
 
@@ -98,6 +93,7 @@ function handleWin() {
     confetti({ particleCount: 150, spread: 70 });
     const currentBest = localStorage.getItem('memoryGameBest');
     let winMsg = `You found them all in ${moves} moves!`;
+
     if (!currentBest || moves < parseInt(currentBest)) {
         localStorage.setItem('memoryGameBest', moves);
         winMsg = `New High Score! ${moves} moves!`;
@@ -117,19 +113,19 @@ function resetGame() { initGame(); }
 function toggleAudioModal() { const modal = document.getElementById('audio-modal'); modal.style.display = modal.style.display === 'none' ? 'flex' : 'none'; }
 
 function applyVolumes() {
-    if (audioState.muted) { 
-        bgMusic.volume = 0; 
-        Object.values(sfx).forEach(s => s.volume = 0); 
-    } else { 
-        bgMusic.volume = audioState.bg * audioState.master; 
-        Object.values(sfx).forEach(s => s.volume = audioState.sfx * audioState.master); 
+    if (audioState.muted) {
+        bgMusic.volume = 0;
+        Object.values(sfx).forEach(s => s.volume = 0);
+    } else {
+        bgMusic.volume = audioState.bg * audioState.master;
+        Object.values(sfx).forEach(s => s.volume = audioState.sfx * audioState.master);
     }
 }
 
-function toggleMute() { 
-    audioState.muted = !audioState.muted; 
-    document.getElementById('mute-btn').innerText = audioState.muted ? 'Mute All: ON' : 'Mute All: OFF'; 
-    applyVolumes(); 
+function toggleMute() {
+    audioState.muted = !audioState.muted;
+    document.getElementById('mute-btn').innerText = audioState.muted ? 'Mute All: ON' : 'Mute All: OFF';
+    applyVolumes();
 }
 
 const countdown = setInterval(() => {
@@ -139,6 +135,6 @@ const countdown = setInterval(() => {
         clearInterval(countdown);
         document.getElementById('intro-overlay').style.display = 'none';
         initGame();
-        kickstartAudio();
+        forcePlayMusic();
     }
 }, 1000);
