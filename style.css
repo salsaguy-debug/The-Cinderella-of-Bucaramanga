@@ -6,156 +6,62 @@
 body {
   background: url('img/40.png') no-repeat center center fixed;
   background-size: cover;
-  margin: 0;
-  font-family: 'Georgia', serif;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  overflow-x: hidden;
+  margin: 0; font-family: 'Georgia', serif; color: white;
+  display: flex; flex-direction: column; align-items: center; min-height: 100vh;
 }
 
 .game-header {
-  width: 100%;
-  background: var(--dark-red);
-  border-bottom: 3px solid var(--orange);
-  padding: 15px 0;
-  text-align: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  width: 100%; background: var(--dark-red);
+  border-bottom: 3px solid var(--orange); padding: 15px 0; text-align: center;
 }
 
 .stats-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 15px;
-  margin-top: 10px;
+  display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px;
 }
 
 .score-box {
-  font-size: 1.2rem;
-  font-weight: bold;
-  background: rgba(0,0,0,0.6);
-  padding: 8px 20px;
-  border-radius: 25px;
-  border: 1px solid var(--orange);
+  font-size: 1.1rem; font-weight: bold; background: rgba(0,0,0,0.6);
+  padding: 8px 15px; border-radius: 20px; border: 1px solid var(--orange);
 }
 
-/* Modals & Overlays */
+.best-score { border-color: #ffd700; color: #ffd700; } /* Golden border for high score */
+
 .overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.85);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100;
 }
 
 .modal-content, .win-card, .intro-box {
-  background: #1a1a1a;
-  padding: 30px;
-  border-radius: 20px;
-  border: 2px solid var(--orange);
-  text-align: center;
-  min-width: 280px;
+  background: #1a1a1a; padding: 30px; border-radius: 20px;
+  border: 2px solid var(--orange); text-align: center; min-width: 280px;
 }
 
-.instructions {
-  text-align: left;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 15px;
-  border-radius: 10px;
-  margin: 15px 0;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
+.volume-group { display: flex; flex-direction: column; gap: 8px; margin: 20px 0; }
+input[type=range] { width: 100%; cursor: pointer; accent-color: #2196F3; }
 
-/* Audio Slider Styles */
-.volume-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin: 20px 0;
-}
-
-.volume-group label {
-  font-weight: bold;
-  font-size: 1.1rem;
-}
-
-input[type=range] {
-  width: 100%;
-  cursor: pointer;
-  accent-color: #2196F3;
-}
-
-/* Memory Game Grid */
 .memory-game {
-  width: 90vw;
-  max-width: 600px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin: 30px auto;
+  width: 90vw; max-width: 600px; display: grid;
+  grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 30px auto;
 }
 
 .memory-card {
-  aspect-ratio: 1/1;
-  position: relative;
-  cursor: pointer;
-  transform-style: preserve-3d;
-  transition: transform 0.4s;
+  aspect-ratio: 1/1; position: relative; cursor: pointer;
+  transform-style: preserve-3d; transition: transform 0.4s;
 }
 
-.memory-card.flip {
-  transform: rotateY(180deg);
-}
+.memory-card.flip { transform: rotateY(180deg); }
 
 .front-face, .back-face {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  backface-visibility: hidden;
-  border-radius: 10px;
-  border: 2px solid var(--orange);
+  width: 100%; height: 100%; position: absolute;
+  backface-visibility: hidden; border-radius: 10px; border: 2px solid var(--orange);
 }
 
-/* IMPORTANT: Card Back uses 3.png */
-.back-face {
-  background: #222 url('img/3.png') no-repeat center center;
-  background-size: cover;
-}
+.back-face { background: #222 url('img/3.png') no-repeat center center; background-size: cover; }
+.front-face { background: white; transform: rotateY(180deg); }
 
-.front-face {
-  background: white;
-  transform: rotateY(180deg);
-}
-
-/* Buttons */
 .btn-orange {
-  background: var(--orange);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 25px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 1rem;
+  background: var(--orange); color: white; border: none;
+  padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: bold;
 }
 
-.btn-orange:hover { filter: brightness(1.1); }
-.btn-orange:active { transform: scale(0.95); }
-
-.btn-close {
-  background: #444;
-  color: white;
-  border: none;
-  padding: 10px 30px;
-  border-radius: 20px;
-  cursor: pointer;
-  margin-top: 15px;
-  font-weight: bold;
-}
+.btn-close { background: #444; color: white; border: none; padding: 10px 30px; border-radius: 20px; cursor: pointer; margin-top: 15px; }
