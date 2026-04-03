@@ -15,35 +15,34 @@ body {
   min-height: 100vh;
 }
 
-/* Header Styles */
-.game-header {
-  width: 100%;
-  background: var(--dark-red);
-  border-bottom: 3px solid var(--orange);
-  padding: 10px 0;
-  text-align: center;
-  z-index: 10;
+.instructions {
+  text-align: left;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-size: 0.9rem;
 }
 
-.stats-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
+/* Audio UI with Slider */
 .audio-ui {
   background: var(--orange);
-  padding: 5px 15px;
+  padding: 8px 15px;
   border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   font-weight: bold;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
 }
 
-/* Grid and Card Styles */
+.volume-group { display: flex; align-items: center; gap: 8px; }
+
+input[type=range] {
+  cursor: pointer;
+  accent-color: white;
+}
+
 .memory-game {
   width: 90vw;
   max-width: 650px;
@@ -61,22 +60,19 @@ body {
   transition: transform 0.4s;
 }
 
-.memory-card.flip {
-  transform: rotateY(180deg);
-}
+.memory-card.flip { transform: rotateY(180deg); }
 
 .front-face, .back-face {
-  width: 100%;
-  height: 100%;
+  width: 100%; height: 100%;
   position: absolute;
   backface-visibility: hidden;
   border-radius: 8px;
   border: 2px solid var(--orange);
 }
 
-/* FIX: This points exactly to your image 6 */
+/* FIX: Card Back Image */
 .back-face {
-  background: #222 url('img/6.png') no-repeat center center;
+  background: url('img/6.png') no-repeat center center;
   background-size: cover;
 }
 
@@ -85,7 +81,6 @@ body {
   transform: rotateY(180deg);
 }
 
-/* UI Elements */
 .overlay {
   position: fixed;
   inset: 0;
@@ -95,14 +90,4 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 100;
-}
-
-.btn-orange {
-  background: var(--orange);
-  color: white;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 20px;
-  font-weight: bold;
-  cursor: pointer;
 }
