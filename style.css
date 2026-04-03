@@ -9,130 +9,12 @@ body {
   color: white;
   font-family: 'Georgia', serif;
   display: flex;
-  flex-direction: column;const gameBoard = document.getElementById('game-board');
-const bgMusic = document.getElementById('bg-music');
-const sfx = {
-    flip: document.getElementById('sound-flip'),
-    match: document.getElementById('sound-match'),
-    mismatch: document.getElementById('sound-mismatch')
-};
-
-const totalPool = 35; // Matches your file list
-const pairsCount = 8;
-let hasFlipped = false;
-let lockBoard = false;
-let firstCard, secondCard, matches, moves;
-
-function initGame() {
-    gameBoard.innerHTML = '';
-    matches = 0; moves = 0;
-    document.getElementById('move-counter').innerText = '0';
-    document.getElementById('win-modal').style.display = 'none';
-    
-    let images = [];
-    const version = new Date().getTime(); // Forces refresh
-
-    for (let i = 1; i <= totalPool; i++) {
-        // Skip 6 (Back) and 30 (Logo)
-        if (i === 6 || i === 30) continue; 
-        
-        // Use .png for ALL files based on your GitHub folder
-        images.push(`${i}.png?v=${version}`);
-    }
-
-    images.sort(() => Math.random() - 0.5);
-    let selection = images.slice(0, pairsCount);
-    let deck = [...selection, ...selection].sort(() => Math.random() - 0.5);
-
-    deck.forEach(name => {
-        const card = document.createElement('div');
-        card.classList.add('memory-card');
-        card.dataset.id = name.split('?')[0]; 
-        card.innerHTML = `
-            <div class="front-face">
-                <img src="img/${name}" style="width:100%; height:100%; object-fit:cover;">
-            </div>
-            <div class="back-face"></div>
-        `;
-        card.addEventListener('click', flipCard);
-        gameBoard.appendChild(card);
-    });
-}
-
-function flipCard() {
-    if (lockBoard || this === firstCard) return;
-    this.classList.add('flip');
-    sfx.flip.play().catch(() => {});
-
-    if (!hasFlipped) {
-        hasFlipped = true;
-        firstCard = this;
-        return;
-    }
-
-    secondCard = this;
-    moves++;
-    document.getElementById('move-counter').innerText = moves;
-    checkMatch();
-}
-
-function checkMatch() {
-    if (firstCard.dataset.id === secondCard.dataset.id) {
-        matches++;
-        sfx.match.play().catch(() => {});
-        if (matches === pairsCount) {
-            confetti({ particleCount: 150, spread: 70 });
-            setTimeout(() => { document.getElementById('win-modal').style.display = 'flex'; }, 500);
-        }
-        resetTurn();
-    } else {
-        lockBoard = true;
-        sfx.mismatch.play().catch(() => {});
-        setTimeout(() => {
-            firstCard.classList.remove('flip');
-            secondCard.classList.remove('flip');
-            resetTurn();
-        }, 1000);
-    }
-}
-
-function resetTurn() {
-    [hasFlipped, lockBoard] = [false, false];
-    [firstCard, secondCard] = [null, null];
-}
-
-function resetGame() { initGame(); }
-
-function updateVolume(val) {
-    bgMusic.volume = val;
-    Object.values(sfx).forEach(s => s.volume = val);
-}
-
-function toggleMute() {
-    const isMuted = !bgMusic.muted;
-    bgMusic.muted = isMuted;
-    Object.values(sfx).forEach(s => s.muted = isMuted);
-    document.getElementById('mute-btn').innerText = isMuted ? '🔇' : '🔊';
-}
-
-let timer = 5;
-const startCounter = setInterval(() => {
-    timer--;
-    const countDisplay = document.getElementById('count-num');
-    if (countDisplay) countDisplay.innerText = timer;
-    if (timer === 0) {
-        clearInterval(startCounter);
-        document.getElementById('intro-overlay').style.display = 'none';
-        bgMusic.play().catch(() => {});
-        initGame();
-    }
-}, 1000);
+  flex-direction: column;
   align-items: center;
   margin: 0;
   min-height: 100vh;
 }
 
-/* Overlays */
 .overlay {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -142,7 +24,15 @@ const startCounter = setInterval(() => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  text-align: center;
+}
+
+/* FIX: Smaller Logo on welcome screen */
+#intro-logo {
+  width: 80px; 
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid var(--orange);
+  margin-bottom: 10px;
 }
 
 .intro-box {
@@ -150,18 +40,9 @@ const startCounter = setInterval(() => {
   padding: 20px;
   border-radius: 15px;
   border: 1px solid var(--orange);
-  max-width: 350px;
+  max-width: 320px;
 }
 
-.instructions {
-  text-align: left;
-  margin: 15px 0;
-  background: rgba(0,0,0,0.5);
-  padding: 10px 20px;
-  border-radius: 10px;
-}
-
-/* Header & Audio Settings */
 .game-header {
   width: 100%;
   padding: 15px 0;
@@ -180,34 +61,24 @@ const startCounter = setInterval(() => {
   margin-top: 10px;
 }
 
-.audio-settings-bar {
+.audio-ui {
   display: flex;
   align-items: center;
   gap: 10px;
   background-color: var(--orange);
   padding: 8px 18px;
-  border-radius: 20px;
+  border-radius: 10px;
   font-weight: bold;
   box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
 }
 
-.volume-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
-}
-
-#volume-slider { accent-color: white; cursor: pointer; width: 70px; }
-
-/* Grid Logic */
 .memory-game {
   width: 90vw;
   max-width: 600px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
-  margin: 30px auto;
+  margin: 20px auto;
 }
 
 .memory-card {
@@ -228,21 +99,8 @@ const startCounter = setInterval(() => {
   border: 2px solid var(--orange);
 }
 
-.front-face { 
-  transform: rotateY(180deg); 
-  background: white; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.back-face { 
-  background-image: url('img/6.png'); 
-  background-size: cover; 
-  background-position: center; 
-}
-
-.img-error { color: var(--crimson); font-weight: bold; font-size: 1.5rem; }
+.front-face { transform: rotateY(180deg); background: white; }
+.back-face { background-image: url('img/6.png'); background-size: cover; }
 
 .btn-orange {
   background: var(--orange);
@@ -252,7 +110,6 @@ const startCounter = setInterval(() => {
   border-radius: 25px;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
 }
 
 .btn-audio { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: white; }
