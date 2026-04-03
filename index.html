@@ -25,24 +25,32 @@
   <div class="game-header">
     <h1>The Cinderella of Bucaramanga</h1>
     <div class="stats-container">
-      <span>Moves: <b id="move-counter">0</b></span>
+      <div class="score-box">Moves: <span id="move-counter">0</span></div>
       
-      <div class="audio-ui">
-        <button id="mute-btn" class="btn-audio" onclick="toggleMute()">🔊</button>
-        <div class="volume-group">
-          <span>Audio Settings</span>
-          <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.5" oninput="updateVolume(this.value)">
-        </div>
-      </div>
+      <button class="btn-orange" onclick="toggleAudioModal()">Audio Settings</button>
+      
+      <button id="new-game-btn" class="btn-orange">New Game</button>
+    </div>
+  </div>
 
-      <button class="btn-orange" onclick="resetGame()">New Game</button>
+  <div id="audio-modal" class="overlay" style="display: none;">
+    <div class="modal-content">
+      <h3>Audio Settings</h3>
+      <div class="volume-group">
+        <label>Master Volume</label>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.5">
+      </div>
+      <button id="mute-btn" class="btn-orange" style="margin-top:15px;">Mute All: OFF</button>
+      <br>
+      <button class="btn-orange" style="margin-top:20px; background:#444;" onclick="toggleAudioModal()">Close</button>
     </div>
   </div>
 
   <div id="win-modal" class="overlay" style="display: none;">
     <div class="win-card">
       <h2>¡Felicidades!</h2>
-      <button class="btn-orange" onclick="resetGame()">Play Again</button>
+      <p>You solved it!</p>
+      <button id="play-again-btn" class="btn-orange">Play Again</button>
     </div>
   </div>
 
