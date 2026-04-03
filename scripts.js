@@ -14,29 +14,49 @@ let firstCard, secondCard, hasFlipped, lockBoard, matches, moves = 0;
 let timer = 5;
 let audioState = { master: 0.5, bg: 0.5, sfx: 0.5, muted: false };
 
-updateBestScoreDisplay();
+// --- CRITICAL AUDIO ENGINE FIX ---
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+let audioCtx;
 
-// --- Event Listeners ---
-document.getElementById('new-game-btn').addEventListener('click', () => { forcePlayMusic(); resetGame(); });
-document.getElementById('play-again-btn').addEventListener('click', () => { forcePlayMusic(); resetGame(); });
-document.getElementById('mute-btn').addEventListener('click', toggleMute);
+function initAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new AudioContext();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
 
-document.getElementById('master-slider').addEventListener('input', (e) => { audioState.master = e.target.value; applyVolumes(); });
-document.getElementById('bg-music-slider').addEventListener('input', (e) => { audioState.bg = e.target.value; applyVolumes(); });
-document.getElementById('sfx-slider').addEventListener('input', (e) => { audioState.sfx = e.target.value; applyVolumes(); });
+// Update Best Score on load
+const best = localStorage.getItem('memoryGameBest');
+bestDisplay.innerText = best ? best : '--';
 
-// GLOBAL TRIGGER: Browser safety unlock
-document.addEventListener('click', forcePlayMusic, { once: false });
+// Trigger music/context on ANY click
+document.addEventListener('click', () => {
+    initAudioContext();
+    forcePlayMusic();
+}, { once: false });
 
 function forcePlayMusic() {
     applyVolumes();
     if (bgMusic.paused) {
         bgMusic.play()
-            .then(() => console.log("Music started."))
-            .catch(() => console.log("Waiting for user gesture..."));
+            .then(() => console.log("OGG Music Playing Successfully"))
+            .catch(err => console.log("Playback pending user interaction..."));
     }
 }
 
+function applyVolumes() {
+    if (audioState.muted) {
+        bgMusic.volume = 0;
+        Object.values(sfx).forEach(s => s.volume = 0);
+    } else {
+        bgMusic.volume = audioState.bg * audioState.master;
+        Object.values(sfx).forEach(s => s.volume = audioState.sfx * audioState.master);
+    }
+}
+
+// --- Game Logic ---
 function initGame() {
     gameBoard.innerHTML = '';
     matches = 0; moves = 0;
@@ -66,10 +86,20 @@ function initGame() {
 
 function flipCard() {
     if (lockBoard || this === firstCard) return;
+    
+    // Attempt to wake up audio on every flip
+    initAudioContext();
     forcePlayMusic();
+
     this.classList.add('flip');
     if (sfx.flip) sfx.flip.play();
-    if (!hasFlipped) { hasFlipped = true; firstCard = this; return; }
+
+    if (!hasFlipped) {
+        hasFlipped = true;
+        firstCard = this;
+        return;
+    }
+
     secondCard = this;
     moves++;
     moveDisplay.innerText = moves;
@@ -85,49 +115,30 @@ function checkMatch() {
     } else {
         lockBoard = true;
         if (sfx.mismatch) sfx.mismatch.play();
-        setTimeout(() => { firstCard.classList.remove('flip'); secondCard.classList.remove('flip'); resetTurn(); }, 1000);
+        setTimeout(() => {
+            firstCard.classList.remove('flip');
+            secondCard.classList.remove('flip');
+            resetTurn();
+        }, 1000);
     }
 }
 
 function handleWin() {
     confetti({ particleCount: 150, spread: 70 });
     const currentBest = localStorage.getItem('memoryGameBest');
-    let winMsg = `You found them all in ${moves} moves!`;
-
     if (!currentBest || moves < parseInt(currentBest)) {
         localStorage.setItem('memoryGameBest', moves);
-        winMsg = `New High Score! ${moves} moves!`;
-        updateBestScoreDisplay();
+        bestDisplay.innerText = moves;
     }
-    document.getElementById('win-message').innerText = winMsg;
     setTimeout(() => { document.getElementById('win-modal').style.display = 'flex'; }, 600);
 }
 
-function updateBestScoreDisplay() {
-    const best = localStorage.getItem('memoryGameBest');
-    bestDisplay.innerText = best ? best : '--';
-}
-
 function resetTurn() { [hasFlipped, lockBoard] = [false, false]; [firstCard, secondCard] = [null, null]; }
-function resetGame() { initGame(); }
-function toggleAudioModal() { const modal = document.getElementById('audio-modal'); modal.style.display = modal.style.display === 'none' ? 'flex' : 'none'; }
 
-function applyVolumes() {
-    if (audioState.muted) {
-        bgMusic.volume = 0;
-        Object.values(sfx).forEach(s => s.volume = 0);
-    } else {
-        bgMusic.volume = audioState.bg * audioState.master;
-        Object.values(sfx).forEach(s => s.volume = audioState.sfx * audioState.master);
-    }
-}
+document.getElementById('new-game-btn').addEventListener('click', () => { initGame(); forcePlayMusic(); });
+document.getElementById('play-again-btn').addEventListener('click', () => { initGame(); forcePlayMusic(); });
 
-function toggleMute() {
-    audioState.muted = !audioState.muted;
-    document.getElementById('mute-btn').innerText = audioState.muted ? 'Mute All: ON' : 'Mute All: OFF';
-    applyVolumes();
-}
-
+// Countdown
 const countdown = setInterval(() => {
     timer--;
     if (document.getElementById('count-num')) document.getElementById('count-num').innerText = timer;
@@ -135,6 +146,21 @@ const countdown = setInterval(() => {
         clearInterval(countdown);
         document.getElementById('intro-overlay').style.display = 'none';
         initGame();
-        forcePlayMusic();
     }
 }, 1000);
+
+// Audio Modal Toggles
+function toggleAudioModal() {
+    const modal = document.getElementById('audio-modal');
+    modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
+}
+function toggleMute() {
+    audioState.muted = !audioState.muted;
+    document.getElementById('mute-btn').innerText = audioState.muted ? 'Mute All: ON' : 'Mute All: OFF';
+    applyVolumes();
+}
+
+// Listeners for Sliders
+document.getElementById('master-slider').addEventListener('input', (e) => { audioState.master = e.target.value; applyVolumes(); });
+document.getElementById('bg-music-slider').addEventListener('input', (e) => { audioState.bg = e.target.value; applyVolumes(); });
+document.getElementById('sfx-slider').addEventListener('input', (e) => { audioState.sfx = e.target.value; applyVolumes(); });
