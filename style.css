@@ -1,136 +1,66 @@
 :root {
   --orange: #ff8c00;
-  --dark-red: rgba(102, 0, 0, 0.85);
+  --dark-red: rgba(102, 0, 0, 0.9);
 }
 
 body {
   background: url('img/40.png') no-repeat center center fixed;
   background-size: cover;
-  margin: 0;
-  font-family: 'Georgia', serif;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-}
-
-/* Restored Instructions Styling */
-.instructions {
-  text-align: left;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 12px;
-  border-radius: 8px;
-  margin: 15px 0;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  margin: 0; font-family: 'Georgia', serif; color: white;
+  display: flex; flex-direction: column; align-items: center; min-height: 100vh;
 }
 
 .game-header {
-  width: 100%;
-  background: var(--dark-red);
-  border-bottom: 3px solid var(--orange);
-  padding: 15px 0;
-  text-align: center;
+  width: 100%; background: var(--dark-red);
+  border-bottom: 3px solid var(--orange); padding: 15px 0; text-align: center;
 }
 
 .stats-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-top: 10px;
+  display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px;
 }
 
-/* Audio UI with Slider */
-.audio-ui {
-  background: var(--orange);
-  padding: 8px 15px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: bold;
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+.score-box {
+  font-size: 1.2rem; font-weight: bold; background: rgba(0,0,0,0.5);
+  padding: 5px 15px; border-radius: 20px; border: 1px solid var(--orange);
 }
 
-.volume-group { display: flex; align-items: center; gap: 8px; }
+/* Modal Styling */
+.modal-content, .win-card {
+  background: #222; padding: 30px; border-radius: 15px;
+  border: 2px solid var(--orange); text-align: center; min-width: 250px;
+}
 
-input[type=range] {
-  cursor: pointer;
-  accent-color: white;
-  width: 80px;
+.volume-group { margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
+
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100;
 }
 
 .memory-game {
-  width: 90vw;
-  max-width: 650px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin: 20px auto;
+  width: 90vw; max-width: 600px; display: grid;
+  grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px auto;
 }
 
 .memory-card {
-  aspect-ratio: 1/1;
-  position: relative;
-  cursor: pointer;
-  transform-style: preserve-3d;
-  transition: transform 0.4s;
+  aspect-ratio: 1/1; position: relative; cursor: pointer;
+  transform-style: preserve-3d; transition: transform 0.4s;
 }
 
 .memory-card.flip { transform: rotateY(180deg); }
 
 .front-face, .back-face {
-  width: 100%; height: 100%;
-  position: absolute;
-  backface-visibility: hidden;
-  border-radius: 8px;
-  border: 2px solid var(--orange);
+  width: 100%; height: 100%; position: absolute;
+  backface-visibility: hidden; border-radius: 8px; border: 2px solid var(--orange);
 }
 
-/* FIX: Card Back is now Image 3 */
-.back-face {
-  background: #333 url('img/3.png') no-repeat center center;
-  background-size: cover;
-}
-
-.front-face {
-  background: white;
-  transform: rotateY(180deg);
-}
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.9);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-}
-
-.intro-box {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 25px;
-  border: 1px solid var(--orange);
-  border-radius: 15px;
-  max-width: 320px;
-  text-align: center;
-}
-
-#intro-logo { width: 80px; border-radius: 50%; margin-bottom: 10px; border: 2px solid var(--orange); }
+/* Card Back is Image 3 */
+.back-face { background: #333 url('img/3.png') no-repeat center center; background-size: cover; }
+.front-face { background: white; transform: rotateY(180deg); }
 
 .btn-orange {
-  background: var(--orange);
-  color: white;
-  border: none;
-  padding: 8px 20px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: bold;
+  background: var(--orange); color: white; border: none;
+  padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: bold;
+  transition: transform 0.2s;
 }
-
-.btn-audio { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: white; }
+.btn-orange:active { transform: scale(0.95); }
