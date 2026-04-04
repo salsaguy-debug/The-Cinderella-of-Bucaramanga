@@ -14,19 +14,17 @@ let firstCard, secondCard, hasFlipped, lockBoard, matches, moves = 0;
 let timer = 5;
 let audioState = { master: 0.5, bg: 0.5, sfx: 0.5, muted: false };
 
-// Initialize best score from local storage
+// Load high score
 const best = localStorage.getItem('memoryGameBest');
 bestDisplay.innerText = best ? best : '--';
 
-// Trigger music/context on ANY click to bypass browser restrictions
+// Global click listener to start audio
 document.addEventListener('click', forcePlayMusic, { once: false });
 
 function forcePlayMusic() {
     applyVolumes();
     if (bgMusic.paused) {
-        bgMusic.play()
-            .then(() => console.log("Music started."))
-            .catch(() => console.log("Interaction required."));
+        bgMusic.play().catch(() => {});
     }
 }
 
@@ -85,14 +83,20 @@ function checkMatch() {
         resetTurn();
     } else {
         lockBoard = true;
-        // Trigger the shaker sound on mismatch
+        
+        // Sound effect
         if (sfx.mismatch) {
             sfx.mismatch.currentTime = 0;
             sfx.mismatch.play();
         }
+
+        // Add shake animation
+        firstCard.classList.add('shake');
+        secondCard.classList.add('shake');
+
         setTimeout(() => {
-            firstCard.classList.remove('flip');
-            secondCard.classList.remove('flip');
+            firstCard.classList.remove('shake', 'flip');
+            secondCard.classList.remove('shake', 'flip');
             resetTurn();
         }, 1000);
     }
@@ -131,7 +135,7 @@ function toggleMute() {
     applyVolumes();
 }
 
-// Volume Slider Event Listeners
+// Listeners for sliders
 document.getElementById('master-slider').addEventListener('input', (e) => { audioState.master = e.target.value; applyVolumes(); });
 document.getElementById('bg-music-slider').addEventListener('input', (e) => { audioState.bg = e.target.value; applyVolumes(); });
 document.getElementById('sfx-slider').addEventListener('input', (e) => { audioState.sfx = e.target.value; applyVolumes(); });
