@@ -18,12 +18,12 @@ let audioState = { master: 0.5, bg: 0.5, sfx: 0.5, muted: false };
 const best = localStorage.getItem('memoryGameBest');
 bestDisplay.innerText = best ? best : '--';
 
-// Global click listener to start audio
+// Start audio on first user click
 document.addEventListener('click', forcePlayMusic, { once: false });
 
 function forcePlayMusic() {
     applyVolumes();
-    if (bgMusic.paused) {
+    if (bgMusic && bgMusic.paused) {
         bgMusic.play().catch(() => {});
     }
 }
@@ -84,13 +84,12 @@ function checkMatch() {
     } else {
         lockBoard = true;
         
-        // Sound effect
         if (sfx.mismatch) {
             sfx.mismatch.currentTime = 0;
             sfx.mismatch.play();
         }
 
-        // Add shake animation
+        // Add shake animation class
         firstCard.classList.add('shake');
         secondCard.classList.add('shake');
 
@@ -117,10 +116,10 @@ function resetTurn() { [hasFlipped, lockBoard] = [false, false]; [firstCard, sec
 function applyVolumes() {
     if (audioState.muted) {
         bgMusic.volume = 0;
-        Object.values(sfx).forEach(s => s.volume = 0);
+        Object.values(sfx).forEach(s => { if(s) s.volume = 0; });
     } else {
         bgMusic.volume = audioState.bg * audioState.master;
-        Object.values(sfx).forEach(s => s.volume = audioState.sfx * audioState.master);
+        Object.values(sfx).forEach(s => { if(s) s.volume = audioState.sfx * audioState.master; });
     }
 }
 
@@ -135,7 +134,7 @@ function toggleMute() {
     applyVolumes();
 }
 
-// Listeners for sliders
+// Sliders
 document.getElementById('master-slider').addEventListener('input', (e) => { audioState.master = e.target.value; applyVolumes(); });
 document.getElementById('bg-music-slider').addEventListener('input', (e) => { audioState.bg = e.target.value; applyVolumes(); });
 document.getElementById('sfx-slider').addEventListener('input', (e) => { audioState.sfx = e.target.value; applyVolumes(); });
