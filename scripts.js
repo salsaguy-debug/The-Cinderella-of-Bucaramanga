@@ -1,157 +1,57 @@
-const gameBoard = document.getElementById('game-board');
-const bgMusic = document.getElementById('bg-music');
-const moveDisplay = document.getElementById('move-counter');
-const bestDisplay = document.getElementById('best-score');
-
-const sfx = {
-    flip: document.getElementById('sound-flip'),
-    match: document.getElementById('sound-match'),
-    mismatch: document.getElementById('sound-mismatch')
-};
-
-const totalPool = 35; 
-const pairsCount = 8; 
-let firstCard, secondCard, hasFlipped, lockBoard, matches, moves = 0;
-let timer = 5;
-let audioState = { master: 0.5, bg: 0.5, sfx: 0.5, muted: false };
-
-// Load Best Score
-const best = localStorage.getItem('memoryGameBest');
-bestDisplay.innerText = best ? best : '--';
-
-// Trigger music on first interaction
-document.addEventListener('click', forcePlayMusic, { once: false });
-
-function forcePlayMusic() {
-    applyVolumes();
-    if (bgMusic && bgMusic.paused) {
-        bgMusic.play().catch(() => { /* Browser still blocking */ });
-    }
+:root { 
+    --orange: #ff8c00; 
+    --dark-red: rgba(102, 0, 0, 0.9); 
 }
 
-function applyVolumes() {
-    if (audioState.muted) {
-        bgMusic.volume = 0;
-        Object.values(sfx).forEach(s => { if(s) s.volume = 0; });
-    } else {
-        bgMusic.volume = audioState.bg * audioState.master;
-        Object.values(sfx).forEach(s => { if(s) s.volume = audioState.sfx * audioState.master; });
-    }
+body { 
+    /* Using 40.png as requested */
+    background: url('img/40.png') no-repeat center center fixed; 
+    background-size: cover; 
+    margin: 0; 
+    font-family: 'Georgia', serif; 
+    color: white; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    min-height: 100vh; 
 }
 
-function initGame() {
-    gameBoard.innerHTML = '';
-    matches = 0; moves = 0;
-    hasFlipped = false; lockBoard = false;
-    moveDisplay.innerText = '0';
-    document.getElementById('win-modal').style.display = 'none';
-    
-    let images = [];
-    for (let i = 1; i <= totalPool; i++) {
-        if (i === 3 || i === 30 || i === 40) continue; 
-        images.push(`${i}.png`);
-    }
-
-    images.sort(() => Math.random() - 0.5);
-    let selection = images.slice(0, pairsCount);
-    let deck = [...selection, ...selection].sort(() => Math.random() - 0.5);
-
-    deck.forEach(name => {
-        const card = document.createElement('div');
-        card.classList.add('memory-card');
-        card.dataset.id = name;
-        card.innerHTML = `
-            <div class="front-face"><img src="img/${name}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"></div>
-            <div class="back-face"></div>`;
-        card.addEventListener('click', flipCard);
-        gameBoard.appendChild(card);
-    });
+/* 50% Logo Reduction */
+.scaled-logo {
+    width: 250px; /* Adjust this to be exactly half of your source image width */
+    height: auto;
+    margin-bottom: 20px;
 }
 
-function flipCard() {
-    if (lockBoard || this === firstCard) return;
-    
-    forcePlayMusic();
+.game-header { width: 100%; background: var(--dark-red); border-bottom: 3px solid var(--orange); padding: 15px 0; text-align: center; }
+.stats-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
+.score-box { font-size: 1.1rem; font-weight: bold; background: rgba(0,0,0,0.6); padding: 8px 15px; border-radius: 20px; border: 1px solid var(--orange); }
 
-    this.classList.add('flip');
-    if (sfx.flip) sfx.flip.play();
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+.modal-content, .win-card, .intro-box { background: #1a1a1a; padding: 30px; border-radius: 20px; border: 2px solid var(--orange); text-align: center; }
 
-    if (!hasFlipped) {
-        hasFlipped = true;
-        firstCard = this;
-        return;
-    }
+.memory-game { width: 90vw; max-width: 600px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 20px auto; }
+.memory-card { aspect-ratio: 1/1; position: relative; cursor: pointer; transform-style: preserve-3d; transition: transform 0.4s; }
+.memory-card.flip { transform: rotateY(180deg); }
 
-    secondCard = this;
-    moves++;
-    moveDisplay.innerText = moves;
-    checkMatch();
+.front-face, .back-face { width: 100%; height: 100%; position: absolute; backface-visibility: hidden; border-radius: 10px; border: 2px solid var(--orange); }
+
+/* Card Back using 3.png as requested */
+.back-face { 
+    background: #222 url('img/3.png') no-repeat center center; 
+    background-size: cover; 
 }
 
-function checkMatch() {
-    if (firstCard.dataset.id === secondCard.dataset.id) {
-        matches++;
-        if (sfx.match) sfx.match.play();
-        if (matches === pairsCount) handleWin();
-        resetTurn();
-    } else {
-        lockBoard = true;
-        
-        if (sfx.mismatch) {
-            sfx.mismatch.currentTime = 0;
-            sfx.mismatch.play();
-        }
+.front-face { background: white; transform: rotateY(180deg); }
 
-        // Shake animation logic
-        firstCard.classList.add('shake');
-        secondCard.classList.add('shake');
-
-        setTimeout(() => {
-            firstCard.classList.remove('shake', 'flip');
-            secondCard.classList.remove('shake', 'flip');
-            resetTurn();
-        }, 1000);
-    }
+/* Shake effect for mismatches */
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    50% { transform: translateX(10px); }
+    75% { transform: translateX(-10px); }
+    100% { transform: translateX(0); }
 }
+.shake { animation: shake 0.3s ease-in-out; }
 
-function handleWin() {
-    confetti({ particleCount: 150, spread: 70 });
-    const currentBest = localStorage.getItem('memoryGameBest');
-    if (!currentBest || moves < parseInt(currentBest)) {
-        localStorage.setItem('memoryGameBest', moves);
-        bestDisplay.innerText = moves;
-    }
-    setTimeout(() => { document.getElementById('win-modal').style.display = 'flex'; }, 600);
-}
-
-function resetTurn() { [hasFlipped, lockBoard] = [false, false]; [firstCard, secondCard] = [null, null]; }
-
-function toggleAudioModal() {
-    const modal = document.getElementById('audio-modal');
-    modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
-}
-
-function toggleMute() {
-    audioState.muted = !audioState.muted;
-    document.getElementById('mute-btn').innerText = audioState.muted ? 'Mute All: ON' : 'Mute All: OFF';
-    applyVolumes();
-}
-
-// Slider Listeners
-document.getElementById('master-slider').addEventListener('input', (e) => { audioState.master = e.target.value; applyVolumes(); });
-document.getElementById('bg-music-slider').addEventListener('input', (e) => { audioState.bg = e.target.value; applyVolumes(); });
-document.getElementById('sfx-slider').addEventListener('input', (e) => { audioState.sfx = e.target.value; applyVolumes(); });
-
-document.getElementById('new-game-btn').addEventListener('click', initGame);
-document.getElementById('play-again-btn').addEventListener('click', initGame);
-
-// Countdown logic
-const countdown = setInterval(() => {
-    timer--;
-    if (document.getElementById('count-num')) document.getElementById('count-num').innerText = timer;
-    if (timer <= 0) {
-        clearInterval(countdown);
-        document.getElementById('intro-overlay').style.display = 'none';
-        initGame();
-    }
-}, 1000);
+.btn-orange { background: var(--orange); color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-weight: bold; }
