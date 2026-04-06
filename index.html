@@ -19,8 +19,8 @@
         <p>✨ <b>MATCH:</b> Find the pair to clear the board.</p>
         <p>🏆 <b>WIN:</b> Complete the full grid to celebrate!</p>
       </div>
-      <p>Preparing the magic in: <b id="count-num">5</b></p>
-      <p style="font-size: 0.8rem; color: #aaa;">(Click anywhere to enable sound)</p>
+      <p id="timer-text">Preparing the magic in: <b id="count-num">5</b></p>
+      <button id="start-btn" class="btn-orange" style="display:none; margin-top:10px;">Enter the Magic</button>
     </div>
   </div>
 
@@ -42,8 +42,6 @@
         <input type="range" id="bg-music-slider" min="0" max="1" step="0.1" value="0.5">
         <label>SFX</label>
         <input type="range" id="sfx-slider" min="0" max="1" step="0.1" value="0.5">
-        <label>Master</label>
-        <input type="range" id="master-slider" min="0" max="1" step="0.1" value="0.5">
       </div>
       <button id="mute-btn" class="btn-orange" onclick="toggleMute()">Mute All: OFF</button>
       <button class="btn-close" onclick="toggleAudioModal()">Close</button>
