@@ -10,7 +10,6 @@ const sfx = {
     mismatch: document.getElementById('sound-mismatch')
 };
 
-// Adjusted to 56 to avoid 404 errors for 57, 58, 59
 const totalPool = 56; 
 const pairsCount = 8; 
 let firstCard, secondCard, hasFlipped, lockBoard, matches, moves = 0;
@@ -20,7 +19,9 @@ bestDisplay.innerText = localStorage.getItem('memoryGameBest') || '--';
 
 function applyVolumes() {
     bgMusic.volume = audioState.muted ? 0 : audioState.bg;
-    Object.values(sfx).forEach(s => { if(s) s.volume = audioState.muted ? 0 : 0.5; });
+    Object.values(sfx).forEach(s => { 
+        if(s) s.volume = audioState.muted ? 0 : audioState.sfx; 
+    });
 }
 
 function initGame() {
@@ -32,7 +33,6 @@ function initGame() {
     
     let images = [];
     for (let i = 1; i <= totalPool; i++) {
-        // Skip UI images
         if (i === 3 || i === 30 || i === 40) continue; 
         images.push(`${i}.png`);
     }
@@ -77,12 +77,12 @@ function flipCard() {
 function checkMatch() {
     if (firstCard.dataset.id === secondCard.dataset.id) {
         matches++;
-        if (sfx.match) sfx.match.play();
+        if (sfx.match) { sfx.match.currentTime = 0; sfx.match.play(); }
         if (matches === pairsCount) handleWin();
         resetTurn();
     } else {
         lockBoard = true;
-        if (sfx.mismatch) sfx.mismatch.play();
+        if (sfx.mismatch) { sfx.mismatch.currentTime = 0; sfx.mismatch.play(); }
         firstCard.classList.add('shake');
         secondCard.classList.add('shake');
 
@@ -117,7 +117,6 @@ function toggleMute() {
     applyVolumes();
 }
 
-// Countdown to start button
 let timer = 5;
 const countdown = setInterval(() => {
     timer--;
@@ -136,6 +135,14 @@ startBtn.addEventListener('click', () => {
     initGame();
 });
 
-document.getElementById('bg-music-slider').addEventListener('input', (e) => { audioState.bg = e.target.value; applyVolumes(); });
+// Settings Listeners
+document.getElementById('bg-music-slider').addEventListener('input', (e) => { 
+    audioState.bg = e.target.value; 
+    applyVolumes(); 
+});
+document.getElementById('sfx-slider').addEventListener('input', (e) => { 
+    audioState.sfx = e.target.value; 
+    applyVolumes(); 
+});
 document.getElementById('new-game-btn').addEventListener('click', initGame);
 document.getElementById('play-again-btn').addEventListener('click', initGame);
