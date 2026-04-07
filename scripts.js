@@ -13,17 +13,12 @@ const sfx = {
 const totalPool = 56; 
 const pairsCount = 8; 
 let firstCard, secondCard, hasFlipped, lockBoard, matches, moves = 0;
-
-// Initialize state with separate values for music and sfx
 let audioState = { bg: 0.5, sfx: 0.5, muted: false };
 
 bestDisplay.innerText = localStorage.getItem('memoryGameBest') || '--';
 
 function applyVolumes() {
-    // Apply Background Music Volume
     bgMusic.volume = audioState.muted ? 0 : audioState.bg;
-    
-    // Apply SFX Volume to all sound elements
     Object.values(sfx).forEach(s => { 
         if(s) s.volume = audioState.muted ? 0 : audioState.sfx; 
     });
@@ -122,7 +117,6 @@ function toggleMute() {
     applyVolumes();
 }
 
-// Countdown Logic
 let timer = 5;
 const countdown = setInterval(() => {
     timer--;
@@ -141,16 +135,13 @@ startBtn.addEventListener('click', () => {
     initGame();
 });
 
-// Slider Listeners
 document.getElementById('bg-music-slider').addEventListener('input', (e) => { 
     audioState.bg = e.target.value; 
     applyVolumes(); 
 });
-
 document.getElementById('sfx-slider').addEventListener('input', (e) => { 
     audioState.sfx = e.target.value; 
     applyVolumes(); 
 });
-
 document.getElementById('new-game-btn').addEventListener('click', initGame);
 document.getElementById('play-again-btn').addEventListener('click', initGame);
