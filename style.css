@@ -12,7 +12,7 @@ body {
     min-height: 100vh; 
 }
 
-/* Red Background and Orange Divider Removed */
+/* Header UI: Transparent with no border divider */
 .game-header { 
     width: 100%; 
     background: none; 
@@ -22,10 +22,12 @@ body {
 }
 
 .game-header h1 {
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.9);
     margin: 0;
+    font-size: 1.8rem;
 }
 
+/* 50% Scaled Logo */
 .scaled-logo { width: 250px; height: auto; margin-bottom: 20px; }
 
 .stats-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
@@ -42,7 +44,9 @@ body {
 .memory-card { aspect-ratio: 1/1; position: relative; cursor: pointer; transform-style: preserve-3d; transition: transform 0.4s; }
 .memory-card.flip { transform: rotateY(180deg); }
 
-.front-face, .back-face { width: 100%; height: 100%; position: absolute; backface-visibility: hidden; border-radius: 10px; border: 1px solid var(--orange); }
+.front-face, .back-face { width: 100%; height: 100%; position: absolute; backface-visibility: hidden; border-radius: 10px; border: 2px solid var(--orange); }
+
+/* Card Back Design */
 .back-face { background: #222 url('img/3.png') no-repeat center center; background-size: cover; }
 .front-face { background: white; transform: rotateY(180deg); }
 
