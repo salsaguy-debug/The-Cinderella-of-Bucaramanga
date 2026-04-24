@@ -7,7 +7,7 @@ body {
     display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
 }
 
-/* Header: Removed red background and orange bar */
+/* Header UI: Removed red background and orange divider */
 .game-header { 
     width: 100%; background: none; border-bottom: none; 
     padding: 20px 0; text-align: center; 
@@ -21,9 +21,21 @@ body {
 .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
 .modal-content, .win-card, .intro-box { background: #1a1a1a; padding: 30px; border-radius: 20px; border: 2px solid var(--orange); text-align: center; min-width: 300px; }
 
-/* Win Screen Photos */
-.celebration-photos { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
-.celebration-photos img { width: 120px; height: 120px; object-fit: cover; border-radius: 10px; border: 2px solid var(--orange); }
+/* Win Screen Photo Styling */
+.celebration-photos { display: flex; justify-content: center; margin-bottom: 20px; }
+.celebration-photos img { 
+    width: 180px; 
+    height: 180px; 
+    object-fit: cover; 
+    border-radius: 15px; 
+    border: 3px solid var(--orange);
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
 
 .volume-control-group { margin-bottom: 20px; text-align: left; }
 .slider-item { margin-bottom: 15px; }
